@@ -44,7 +44,7 @@ def parse_xml(label_path):
     x = xmltodict.parse(open(label_path , 'rb'))
     item_list = x['annotation']['object']
 
-    print(item_list)
+    # print(item_list)
     
     # when image has only one bounding box
     if not isinstance(item_list, list):
@@ -96,10 +96,10 @@ def visualize_image(image_name, bndbox=True):
 
 image_names = getImageNames()
 
-NUM_OF_IMGS_TO_VISUALIZE = 5
+# NUM_OF_IMGS_TO_VISUALIZE = 5
 
-for i in range(NUM_OF_IMGS_TO_VISUALIZE):
-    visualize_image(image_names[i])
+# for i in range(NUM_OF_IMGS_TO_VISUALIZE):
+#     visualize_image(image_names[i])
 
 def cropImage(image_name):
     image_path, label_path = get_path(image_name)

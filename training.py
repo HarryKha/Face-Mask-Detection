@@ -13,8 +13,7 @@ import preprocess
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device
-
+print(device)
 model = models.resnet50(pretrained=True)
 
 for layer, param in model.named_parameters():
@@ -25,7 +24,7 @@ for layer, param in model.named_parameters():
 model.fc = torch.nn.Sequential(torch.nn.Linear(2048, 512),
                                  torch.nn.ReLU(),
                                  torch.nn.Dropout(0.2),
-                                 torch.nn.Linear(512, 2),
+                                 torch.nn.Linear(512, 3),
                                  torch.nn.LogSoftmax(dim=1))
 
 train_transforms = transforms.Compose([
@@ -34,7 +33,7 @@ train_transforms = transforms.Compose([
     transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5))
     ])
 
-dataset = datasets.ImageFolder(dir_name, transform = train_transforms)
+dataset = datasets.ImageFolder(preprocess.dir_name, transform = train_transforms)
 
 dataset_size = len(dataset)
 train_size = int(dataset_size * 0.6)
@@ -68,7 +67,7 @@ LEARNING_RATE = 0.001
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr = LEARNING_RATE)
 
-#model.cuda()
+model.cuda()
 model.to(device)
 
 total_epoch = 20
@@ -85,10 +84,14 @@ for epoch in range(total_epoch):
     for X, y in train_loader:
         
         X, y = X.cuda(), y.cuda()
-        
+        # print(train_loader)
+        # print(X.shape)
+        # print(y.shape)
         optimizer.zero_grad()
         result = model(X)
+        # print(result)
         loss = criterion(result, y)
+        # print(loss)
         epoch_train_loss += loss.item()
         loss.backward()
         optimizer.step()
@@ -123,12 +126,12 @@ for epoch in range(total_epoch):
                             'state_dict': model.state_dict(),
                             'optimizer' : optimizer.state_dict()}
 
-        torch.save(checkpoint, models_dir + '{}.pth'.format(epoch))
+        torch.save(checkpoint, preprocess.models_dir + '{}.pth'.format(epoch))
         print("Model saved")
 
-plt.plot(range(total_epoch), training_losses, label='Training')
-plt.plot(range(total_epoch), val_losses, label='Validation')
-plt.legend()
+preprocess.plt.plot(range(total_epoch), training_losses, label='Training')
+preprocess.plt.plot(range(total_epoch), val_losses, label='Validation')
+preprocess.plt.legend()
 
 def load_checkpoint(filepath):
     checkpoint = torch.load(filepath)
@@ -140,7 +143,7 @@ def load_checkpoint(filepath):
     return model.eval()
 
 
-filepath = models_dir + str(best_epoch) + ".pth"
+filepath = preprocess.models_dir + str(best_epoch) + ".pth"
 loaded_model = load_checkpoint(filepath)
 print(filepath)
 
