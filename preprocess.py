@@ -5,6 +5,11 @@ import os
 from os import listdir
 from os.path import isfile, join
 
+dir_name = 'train/'
+label_0_dir = dir_name + "0/"
+label_1_dir = dir_name + "1/"
+label_2_dir = dir_name + "2/"
+models_dir = "models/"
 
 def getImageNames():
     image_names = []
@@ -94,8 +99,6 @@ def visualize_image(image_name, bndbox=True):
     plt.imshow(image)
     plt.show()
 
-image_names = getImageNames()
-
 # NUM_OF_IMGS_TO_VISUALIZE = 5
 
 # for i in range(NUM_OF_IMGS_TO_VISUALIZE):
@@ -105,7 +108,7 @@ def cropImage(image_name):
     image_path, label_path = get_path(image_name)
     
     image = cv2.imread(image_path)
-    # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     
     labels, size = parse_xml(label_path)
     
@@ -138,49 +141,47 @@ def createDirectory(dirname):
     except FileExistsError:
         print("Directory " + dirname + " already exists.")
 
-dir_name = 'train/'
-label_0_dir = dir_name + "0/"
-label_1_dir = dir_name + "1/"
-label_2_dir = dir_name + "2/"
-models_dir = "models/"
+def main():    
+    image_names = getImageNames()
 
+    createDirectory(dir_name)
+    createDirectory(label_0_dir)
+    createDirectory(label_1_dir)
+    createDirectory(label_2_dir)
+    createDirectory(models_dir)
 
-createDirectory(dir_name)
-createDirectory(label_0_dir)
-createDirectory(label_1_dir)
-createDirectory(label_2_dir)
-createDirectory(models_dir)
+    label_0_counter = 0
+    label_1_counter = 0
+    label_2_counter = 0
 
-label_0_counter = 0
-label_1_counter = 0
-label_2_counter = 0
-
-for image_name in image_names:
-    cropedImgLabels = cropImage(image_name)
-    
-    for cropedImgLabel in cropedImgLabels:
+    for image_name in image_names:
+        cropedImgLabels = cropImage(image_name)
         
-        label = cropedImgLabel[1]
-        img = cropedImgLabel[0]
-        
-        if label == 0:
-            croped_img_name = str(label_0_counter) + ".jpg"
-            cv2.imwrite(label_0_dir + croped_img_name, img)
-            label_0_counter += 1
-        elif label == 1:
-            croped_img_name = str(label_1_counter) + ".jpg"
-            cv2.imwrite(label_1_dir + croped_img_name, img)
-            label_1_counter += 1
-        elif label == 2:
-            croped_img_name = str(label_2_counter) + ".jpg"
-            cv2.imwrite(label_2_dir + croped_img_name, img)
-            label_2_counter += 1
+        for cropedImgLabel in cropedImgLabels:
+            
+            label = cropedImgLabel[1]
+            img = cropedImgLabel[0]
+            
+            if label == 0:
+                croped_img_name = str(label_0_counter) + ".jpg"
+                cv2.imwrite(label_0_dir + croped_img_name, img)
+                label_0_counter += 1
+            elif label == 1:
+                croped_img_name = str(label_1_counter) + ".jpg"
+                cv2.imwrite(label_1_dir + croped_img_name, img)
+                label_1_counter += 1
+            elif label == 2:
+                croped_img_name = str(label_2_counter) + ".jpg"
+                cv2.imwrite(label_2_dir + croped_img_name, img)
+                label_2_counter += 1
 
-filenames_label_0 = [f for f in listdir(label_0_dir) if isfile(join(label_0_dir, f))]
-filenames_label_1 = [f for f in listdir(label_1_dir) if isfile(join(label_1_dir, f))]
-filenames_label_2 = [f for f in listdir(label_2_dir) if isfile(join(label_2_dir, f))]
+    filenames_label_0 = [f for f in listdir(label_0_dir) if isfile(join(label_0_dir, f))]
+    filenames_label_1 = [f for f in listdir(label_1_dir) if isfile(join(label_1_dir, f))]
+    filenames_label_2 = [f for f in listdir(label_2_dir) if isfile(join(label_2_dir, f))]
 
-print("Total number of images: " + str(len(filenames_label_0) + len(filenames_label_1)))
-print("Number of images labeled 0: " + str(len(filenames_label_0)))
-print("Number of images labeled 1: " + str(len(filenames_label_1)))
-print("Number of images labeled 2: " + str(len(filenames_label_2)))
+    print("Total number of images: " + str(len(filenames_label_0) + len(filenames_label_1)))
+    print("Number of images labeled 0: " + str(len(filenames_label_0)))
+    print("Number of images labeled 1: " + str(len(filenames_label_1)))
+    print("Number of images labeled 2: " + str(len(filenames_label_2)))
+
+main()
